@@ -1,4 +1,6 @@
-from sqlalchemy import select, text
+import datetime
+
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from database import Base, engine, async_session_factory
 from models import StudentsOrm, GroupOrm
@@ -22,9 +24,15 @@ class AsyncORM:
     @staticmethod
     async def update_student(student_id: int, new_name: str):
         async with async_session_factory() as session:
-            student = await session.get(StudentsOrm, student_id)
-            student.username = new_name
-            await session.refresh(student)
+            stmt = (
+                update(StudentsOrm)
+                .where(StudentsOrm.id == student_id)
+                .values(
+                    name=new_name,
+                    updated_at=datetime.datetime.utcnow()
+                )
+            )
+            await session.execute(stmt)
             await session.commit()
 
     @staticmethod
@@ -47,7 +55,7 @@ class AsyncORM:
             query = select(GroupOrm)
             result = await session.execute(query)
             groups = result.scalars().all()
-            print(f"{groups=}")
+            return groups
 
     @staticmethod
     async def update_group(group_id: int, name: str):
