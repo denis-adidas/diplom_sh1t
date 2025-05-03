@@ -70,8 +70,8 @@ async def post_new_student(
     data: PostUpdateGroupBody = Body(...)
 ):
     return await AsyncORM.update_group(
-        group_id=data.student_id,
-        name=data.new_name
+        group_id=data.group_id,
+        name=data.name
     )
 
 

@@ -60,9 +60,14 @@ class AsyncORM:
     @staticmethod
     async def update_group(group_id: int, name: str):
         async with async_session_factory() as session:
-            group = await session.get(GroupOrm, group_id)
-            group.name = name
-            await session.refresh(group)
+            stmt = (
+                update(GroupOrm)
+                .where(GroupOrm.id == group_id)
+                .values(
+                    name=name,
+                )
+            )
+            await session.execute(stmt)
             await session.commit()
 
     @staticmethod
