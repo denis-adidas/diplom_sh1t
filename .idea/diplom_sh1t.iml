@@ -3,9 +3,12 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/apps/data_service" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/data_service/.venv/Scripts" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/manage_service" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/apps/data_service/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/manage_service/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.13 virtualenv at C:\Users\den_p\PycharmProjects\diplom_sh1t\apps\data_service\.venv" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.13 virtualenv at C:\Users\den_p\PycharmProjects\diplom_sh1t\apps\manage_service\venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
