@@ -7,7 +7,7 @@ from models import (
     GetStudentList
 )
 
-app = FastAPI()
+app = FastAPI(title="Manage Service")
 
 @app.get("/")
 def status_index():
