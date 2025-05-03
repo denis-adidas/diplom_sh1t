@@ -31,7 +31,7 @@ def status_index():
 @app.get("/students/get", tags=[apis.students])
 async def get_student_list():
     students = await AsyncORM.select_students()
-    return students
+    return {"students" : students}
 
 @app.post("/students/new", tags=[apis.students])
 async def post_new_student(
@@ -46,7 +46,7 @@ async def post_new_student(
 async def post_new_student(
     data: PostUpdateStudentBody = Body(...)
 ):
-    return await AsyncORM.update_student(
+    return await AsyncORM.update_student( #todo status code
         student_id=data.student_id,
         new_name=data.new_name
     )
@@ -55,7 +55,7 @@ async def post_new_student(
 @app.get("/groups/get", tags=[apis.groups])
 async def get_student_list():
     groups = await AsyncORM.select_group()
-    return groups
+    return {"groups" : groups}
 
 @app.post("/groups/new", tags=[apis.groups])
 async def post_new_student(
@@ -76,4 +76,4 @@ async def post_new_student(
 
 
 if __name__ == '__main__':
-    uvicorn.run(app)
+    uvicorn.run(app, port=8001)
