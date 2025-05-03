@@ -57,7 +57,7 @@ async def get_student_list():
     groups = await AsyncORM.select_group()
     return {"groups" : groups}
 
-@app.post("/groups/new", tags=[apis.groups])
+@app.post("/groups/new", tags=[apis.groups], status_code=204)
 async def post_new_student(
     data: PostNewGroupBody = Body(...)
 ):
@@ -65,7 +65,7 @@ async def post_new_student(
         name=data.name,
     )
 
-@app.post("/groups/update", tags=[apis.groups])
+@app.post("/groups/update", tags=[apis.groups], status_code=204)
 async def post_new_student(
     data: PostUpdateGroupBody = Body(...)
 ):

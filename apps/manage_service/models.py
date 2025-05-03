@@ -5,5 +5,9 @@ class Student(BaseModel):
     name: str
     group_id: int
 
+class Group(BaseModel):
+    id: int
+    name: str
+
 class GetStudentList(BaseModel):
-    pass
+    students: list[Student]

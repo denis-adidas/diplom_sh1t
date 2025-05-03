@@ -1,6 +1,11 @@
 import requests, uvicorn
 
 from fastapi import FastAPI
+from config import settings
+
+from models import (
+    GetStudentList
+)
 
 app = FastAPI()
 
@@ -10,10 +15,10 @@ def status_index():
         "message" : "success"
     }
 
-@app.get("/get/info")
+@app.get("/get/students")
 def test():
-    response = requests.get("http://localhost:8001/students/get") #todo как не задавать прямые ссылки?
-    return response.json()
+    response = requests.get(f"{settings.URL}/students/get") #todo костыль😭
+    return GetStudentList(**response.json())
 
 if __name__ == '__main__':
     uvicorn.run(app, port=8000)
