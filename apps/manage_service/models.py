@@ -11,3 +11,8 @@ class Group(BaseModel):
 
 class GetStudentList(BaseModel):
     students: list[Student]
+
+# REQUESTS
+class PostStudentWithGroupsRequest(BaseModel):
+    students: list[StudentsOrm]
+    groups: list[GroupOrm]

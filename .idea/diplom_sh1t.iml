@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/apps/data_service" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/apps/data_service/.venv/Scripts" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/apps/manage_service" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/apps/bussines_service" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/apps/data_service/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/apps/manage_service/.venv" />
     </content>
