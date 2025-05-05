@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from config import settings
 
 from models import (
-    GetStudentList
+    GetStudentList, PostStudentWithGroupsRequest, StudentOrm
 )
 
 app = FastAPI(title="Manage Service")
@@ -20,17 +20,23 @@ def test():
     response = requests.get(f"{settings.URL}/students/get") #todo костыль😭
     return GetStudentList(**response.json())
 
-@app.get
+@app.get("/get/stud_info")
 def student_with_groups_list():
-    students = requests.get(f"{settings.URL}/students/get")
-    groups = requests.get(f"{settings.URL}/groups/get")
-    return requests.post(students, groups)
+    students = requests.get(f"{settings.DATA_URL}/students/get")
+    groups = requests.get(f"{settings.DATA_URL}/groups/get")
 
-@app.post
-def change_stud_name(
+    payload = PostStudentWithGroupsRequest(
+        students=students.json()["students"],
+        groups=groups.json()["groups"]
+    )
 
-):
-    pass
+    response = requests.post(
+        url=f"{settings.BUSSINESS_URL}/post/student_group",
+        json=payload.model_dump(exclude_none=True)
+    )
+
+    return response.json()
+
 
 if __name__ == '__main__':
     uvicorn.run(app, port=8000)
