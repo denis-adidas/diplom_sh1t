@@ -1,4 +1,3 @@
-import asyncio
 from enum import StrEnum
 
 import uvicorn
@@ -13,6 +12,7 @@ from models import (
 from fastapi import FastAPI
 from query.orm import AsyncORM
 from fastapi import Body
+from database import init_models
 
 app = FastAPI(title="Data service")
 
@@ -26,6 +26,10 @@ def status_index():
     return {
         "message" : "success"
     }
+
+@app.on_event("startup")
+async def on_startup():
+    await init_models()
 
 # вынести в роутеры
 @app.get("/students/get", tags=[apis.students])

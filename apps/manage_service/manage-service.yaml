@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manage-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manage-service
+  template:
+    metadata:
+      labels:
+        app: manage-service
+    spec:
+      containers:
+        - name: manage-service
+          image: manage_service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: manage-service
+spec:
+  selector:
+    app: manage-service
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30000
+  type: NodePort
+
