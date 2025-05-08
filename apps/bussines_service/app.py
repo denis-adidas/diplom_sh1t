@@ -1,7 +1,7 @@
 import requests, uvicorn
 
 from fastapi import FastAPI, Body
-
+from models import PostCreateStudentWithGroups
 
 from models import (
     PostStudentWithGroupsRequest,
@@ -36,6 +36,19 @@ def post_get_stu_with_groups(
                 )
 
     return PostStudentWithGroupResponse(info=res)
+
+@app.post("/post/find_group")
+def post_find_group(
+    body: PostCreateStudentWithGroups = Body(...)
+) -> int | None:
+    if body.group_id is not None:
+        return body.group_id
+    else:
+        for group in body.groups_list:
+            if group.name == body.group_name:
+                return group.id
+        return None
+
 
 if __name__ == '__main__':
     uvicorn.run(app, port=8002)
