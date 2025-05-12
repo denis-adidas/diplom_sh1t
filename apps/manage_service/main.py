@@ -1,3 +1,5 @@
+from asyncio import timeout
+
 import requests, uvicorn
 
 from fastapi import FastAPI, Body
@@ -25,7 +27,7 @@ def status_index():
 
 @app.get("/get/students")
 def get_student_list():
-    response = requests.get(f"{settings.DATA_URL}/students/get")
+    response = requests.get(f"{settings.DATA_URL}/students/get", timeout = 60)
     return GetStudentList(**response.json())
 
 
@@ -41,7 +43,8 @@ def student_with_groups_list():
 
     response = requests.post(
         url=f"{settings.BUSSINESS_URL}/post/student_group",
-        json=payload.model_dump(exclude_none=True)
+        json=payload.model_dump(exclude_none=True),
+        timeout=60
     )
 
     return response.json()
@@ -51,12 +54,13 @@ def student_with_groups_list():
 def post_create_student(
         body: PostCreateStudent = Body(...)
 ):
-    response = requests.get(f"{settings.DATA_URL}/groups/get")
+    response = requests.get(f"{settings.DATA_URL}/groups/get", timeout = 60)
 
     groups_list = TypeAdapter(list[GroupOrm]).validate_python(response.json()["groups"])
 
     group_id = requests.post(
         url=f"{settings.BUSSINESS_URL}/post/find_group",
+        timeout=60,
         json=PostCreateStudentWithGroups(
             name=body.name,
             group_id=body.group_id if body.group_id else None,
@@ -68,9 +72,10 @@ def post_create_student(
     if group_id is None:
         requests.post(
             url=f"{settings.DATA_URL}/groups/new",
-            json={"name": body.group_name}
+            json={"name": body.group_name},
+            timeout=60
         )
-        response = requests.get(f"{settings.DATA_URL}/groups/get")
+        response = requests.get(f"{settings.DATA_URL}/groups/get", timeout = 60)
 
         groups_list = TypeAdapter(list[GroupOrm]).validate_python(response.json()["groups"])
 
@@ -83,7 +88,8 @@ def post_create_student(
             json={
                 "name": body.name,
                 "group_id": group_id
-            }
+            },
+            timeout=60
         )
         return {"message" : "success"}
     else:
@@ -92,7 +98,8 @@ def post_create_student(
             json={
                 "name": body.name,
                 "group_id": group_id
-            }
+            },
+            timeout=60
         )
         return {"message" : "success"}
 
