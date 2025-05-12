@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bussines-service
+  name: bussines-service.yaml
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bussines-service
+      app: bussines-service.yaml
   template:
     metadata:
       labels:
-        app: bussines-service
+        app: bussines-service.yaml
     spec:
       containers:
-        - name: bussines-service
+        - name: bussines-service.yaml
           image: bussines_service:latest
           imagePullPolicy: Never
           ports:
@@ -22,10 +22,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: bussines-service
+  name: bussines-service.yaml
 spec:
   selector:
-    app: bussines-service
+    app: bussines-service.yaml
   ports:
     - protocol: TCP
       port: 8002
