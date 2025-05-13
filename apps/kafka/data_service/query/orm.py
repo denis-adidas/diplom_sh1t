@@ -37,6 +37,7 @@ class AsyncORM:
 
     @staticmethod
     async def insert_student(name: str, group_id: int):
+        print(f"[ORM] INSERT student: {name}, group_id: {group_id}")
         try:
             async with async_session_factory() as session:
                 student = StudentsOrm(

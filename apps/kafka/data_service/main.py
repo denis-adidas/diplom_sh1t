@@ -37,7 +37,7 @@ async def on_startup():
 
 async def kafka_listener():
     consumer = AIOKafkaConsumer(
-        "get_students", "get_groups",
+        "get_students", "get_groups", "create_student_full",
         bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
         group_id="data_service",
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),
@@ -53,6 +53,7 @@ async def kafka_listener():
 
     try:
         async for msg in consumer:
+            print(f"[kafka] TOPIC: {msg.topic!r}")
             data = msg.value
             correlation_id = data.get("correlation_id")
 
@@ -61,11 +62,7 @@ async def kafka_listener():
                 await producer.send_and_wait("students_response", {
                     "correlation_id": correlation_id,
                     "students": [
-                        {
-                            "id": s.id,
-                            "name": s.name,
-                            "group_id": s.group_id
-                        }
+                        {"id": s.id, "name": s.name, "group_id": s.group_id}
                         for s in students
                     ]
                 })
@@ -75,13 +72,36 @@ async def kafka_listener():
                 await producer.send_and_wait("groups_response", {
                     "correlation_id": correlation_id,
                     "groups": [
-                        {
-                            "id": g.id,
-                            "name": g.name
-                        }
+                        {"id": g.id, "name": g.name}
                         for g in groups
                     ]
                 })
+
+            elif msg.topic == "create_student_full":
+                print(f"[data_service] Handling create_student_full for: {data}")
+                student = data["student"]
+                result = await AsyncORM.insert_student(
+                    name=student["name"],
+                    group_id=student["group_id"]
+                )
+                await producer.send_and_wait("create_student_full_response", {
+                    "correlation_id": correlation_id,
+                    "status": "ok",
+                    "created_id": result.id if result else None
+                })
+
+            elif msg.topic == "create_group":
+                group_name = data.get("group_name")
+                correlation_id = data.get("correlation_id")
+
+                print(f"[data_service] Creating group: {group_name}")
+                group = await AsyncORM.insert_group(name=group_name)
+
+                await producer.send_and_wait("find_group_response", {
+                    "correlation_id": correlation_id,
+                    "group_id": group.id
+                })
+
 
     finally:
         await consumer.stop()

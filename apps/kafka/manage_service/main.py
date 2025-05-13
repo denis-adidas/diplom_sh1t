@@ -11,7 +11,11 @@ from models import PostCreateStudent
 app = FastAPI(title="Manage Service (Kafka)")
 kafka = KafkaManager(settings.KAFKA_BOOTSTRAP_SERVERS)
 consumer = KafkaResponseConsumer(settings.KAFKA_BOOTSTRAP_SERVERS, topics=[
-    "students_response", "groups_response", "student_group_response"
+    "students_response",
+    "groups_response",
+    "student_group_response",
+    "create_student_full_response",
+    "find_group_response"
 ])
 
 @app.on_event("startup")
@@ -64,18 +68,42 @@ async def post_create_student(body: PostCreateStudent = Body(...)):
     future = asyncio.get_event_loop().create_future()
     pending_results[correlation_id] = future
 
-    await kafka.send("create_student_request", {
-        "correlation_id": correlation_id,
-        "student": body.model_dump(exclude_none=True)
+    # 1. Запрашиваем все группы
+    await kafka.send("get_groups", {"correlation_id": correlation_id})
+    groups_response = await asyncio.wait_for(future, timeout=60)
+    groups_list = groups_response["groups"]
+
+    # 2. Запрашиваем group_id у бизнес-сервиса
+    correlation_id2 = str(uuid4())
+    future2 = asyncio.get_event_loop().create_future()
+    pending_results[correlation_id2] = future2
+
+    await kafka.send("find_group_request", {
+        "correlation_id": correlation_id2,
+        "student": body.model_dump(exclude_none=True),
+        "groups_list": groups_list
     })
 
-    try:
-        result = await asyncio.wait_for(future, timeout=60)
-        return result
-    except asyncio.TimeoutError:
-        return {"error": "timeout while waiting for create_student_response"}
-    finally:
-        pending_results.pop(correlation_id, None)
+    group_id_response = await asyncio.wait_for(future2, timeout=60)
+    group_id = group_id_response["group_id"]
+
+    # 3. Отправляем финальный create_student_full
+    correlation_id3 = str(uuid4())
+    future3 = asyncio.get_event_loop().create_future()
+    pending_results[correlation_id3] = future3
+
+    await kafka.send("create_student_full", {
+        "correlation_id": correlation_id3,
+        "student": {
+            "name": body.name,
+            "group_id": group_id
+        }
+    })
+    print(f"[manage_service] Sent create_student_full with group_id={group_id}")
+
+    await asyncio.wait_for(future3, timeout=60)
+    return {"message": "success"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, port=8000)
