@@ -37,7 +37,10 @@ async def on_startup():
 
 async def kafka_listener():
     consumer = AIOKafkaConsumer(
-        "get_students", "get_groups", "create_student_full",
+        "get_students",
+        "get_groups",
+        "create_student_full",
+        "create_group",
         bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
         group_id="data_service",
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),

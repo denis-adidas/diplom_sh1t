@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bussines-service
+spec:
+  ports:
+    - port: 8002
+      targetPort: 8002
+  selector:
+    app: bussines-service
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bussines-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bussines-service
+  template:
+    metadata:
+      labels:
+        app: bussines-service
+    spec:
+      containers:
+        - name: bussines-service
+          image: bussines-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8002

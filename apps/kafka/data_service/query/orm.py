@@ -74,9 +74,8 @@ class AsyncORM:
     @staticmethod
     async def insert_group(name: str):
         async with async_session_factory() as session:
-            group = GroupOrm(
-                name=name
-            )
+            group = GroupOrm(name=name)
             session.add(group)
-
             await session.commit()
+            await session.refresh(group)
+            return group

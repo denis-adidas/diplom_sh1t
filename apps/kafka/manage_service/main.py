@@ -2,7 +2,10 @@ import uvicorn
 from fastapi import FastAPI, Body
 from uuid import uuid4
 import asyncio
-
+from datetime import datetime
+from aiokafka import AIOKafkaConsumer
+from collections import defaultdict
+from aiokafka.structs import TopicPartition
 from kafka_producer import KafkaManager
 from kafka_consumer import KafkaResponseConsumer, pending_results
 from config import settings
@@ -18,10 +21,49 @@ consumer = KafkaResponseConsumer(settings.KAFKA_BOOTSTRAP_SERVERS, topics=[
     "find_group_response"
 ])
 
+async def log_kafka_queue_sizes(interval=5):
+    consumer = AIOKafkaConsumer(
+        bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
+        group_id="monitoring_group",
+        enable_auto_commit=False
+    )
+    await consumer.start()
+    try:
+        topics = [
+            "get_students",
+            "get_groups",
+            "process_student_group",
+            "find_group_request",
+            "create_student_full"
+        ]
+        while True:
+            topic_sizes = defaultdict(dict)
+
+            for topic in topics:
+                partitions = consumer.partitions_for_topic(topic)
+                if not partitions:
+                    continue
+                for p in partitions:
+                    tp = TopicPartition(topic, p)
+                    end_offset = await consumer.end_offsets([tp])
+                    topic_sizes[topic][p] = end_offset[tp]
+
+            now = datetime.now().isoformat(timespec="seconds")
+            for topic, parts in topic_sizes.items():
+                for p, offset in parts.items():
+                    print(f"[{now}] [KAFKA] {topic} [partition {p}]: offset={offset}")
+
+            await asyncio.sleep(interval)
+    finally:
+        await consumer.stop()
+
+
+
 @app.on_event("startup")
 async def startup():
     await kafka.start()
     await consumer.start()
+    asyncio.create_task(log_kafka_queue_sizes(interval=5))
 
 @app.on_event("shutdown")
 async def shutdown():

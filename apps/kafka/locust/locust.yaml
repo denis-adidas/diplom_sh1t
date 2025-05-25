@@ -1,35 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: manage-service
+  name: locust
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: manage-service
+      app: locust
   template:
     metadata:
       labels:
-        app: manage-service
+        app: locust
     spec:
       containers:
-        - name: manage-service
-          image: manage-service:latest
+        - name: locust
+          image: locust:latest
           imagePullPolicy: Never
           ports:
-            - containerPort: 8000
+            - containerPort: 8089
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: manage-service
+  name: locust
 spec:
   selector:
-    app: manage-service
+    app: locust
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
-      nodePort: 30000
+      port: 8089
+      targetPort: 8089
   type: NodePort
-

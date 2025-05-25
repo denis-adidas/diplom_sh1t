@@ -7,7 +7,7 @@ import uvicorn
 
 app = FastAPI(title="Business Service")
 
-KAFKA_BOOTSTRAP_SERVERS = "localhost:9092"
+KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
 
 @app.on_event("startup")
 async def startup():
